@@ -17,15 +17,18 @@ public class Part6HotTransformationAndProcession {
         // TODO: transform to hot by publishing elements regardless amount of subscribers
         // HINT: Flux#publish() + .autoConnect()
 
-        throw new RuntimeException("Not implemented");
+        return coldSource.publish().autoConnect();
+
+//        throw new RuntimeException("Not implemented");
     }
 
     @Complexity(MEDIUM)
     public static Publisher<String> replayLast3ElementsInHotFashion(Flux<String> coldSource) {
         // TODO: reply 3 last elements to subscribers
         // HINT: Flux#reply(3) + .autoConnect()
+        return coldSource.replay(3).autoConnect();
 
-        throw new RuntimeException("Not implemented");
+//        throw new RuntimeException("Not implemented");
     }
 
 
@@ -36,7 +39,13 @@ public class Part6HotTransformationAndProcession {
         //       2) subscribe cold source onto created instance of Processor
         //       3) return processor instance
 
-        throw new RuntimeException("Not implemented");
+
+        DirectProcessor<String> processor = DirectProcessor.create();
+        coldSource.subscribe(processor);
+
+        return processor;
+
+//        throw new RuntimeException("Not implemented");
     }
 
     @Complexity(MEDIUM)
@@ -46,6 +55,10 @@ public class Part6HotTransformationAndProcession {
         //       2) subscribe cold source onto created instance of Processor
         //       3) return processor instance
 
-        throw new RuntimeException("Not implemented");
+        TopicProcessor<String> topicProcessor = TopicProcessor.create();
+        coldSource.subscribe(topicProcessor);
+        return topicProcessor;
+
+//        throw new RuntimeException("Not implemented");
     }
 }

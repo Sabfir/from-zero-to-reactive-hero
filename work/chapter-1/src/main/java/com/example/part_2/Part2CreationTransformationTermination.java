@@ -20,30 +20,39 @@ public class Part2CreationTransformationTermination {
     public static Mono<List<String>> collectAllItemsToList(Flux<String> source) {
         // TODO: collect to list
         // Flux#collectList or Flux#collect(+Collectors.toList)
+        return Mono
+                .from(source.collectList());
 
-        throw new RuntimeException("Not implemented");
+//        throw new RuntimeException("Not implemented");
     }
 
     @Complexity(EASY)
     public static String lastElementFromSource(Flux<String> source) {
         // TODO: block until all emitted
+        return source
+                .last()
+                .block();
 
-        throw new RuntimeException("Not implemented");
+//        throw new RuntimeException("Not implemented");
     }
 
     @Complexity(EASY)
     public static Publisher<String> mergeSeveralSources(Publisher<String>... sources) {
         // TODO: merge all sources in one stream
+        return Flux
+                .merge(sources);
 
-        throw new RuntimeException("Not implemented");
+//        throw new RuntimeException("Not implemented");
     }
 
     @Complexity(EASY)
     public static Publisher<String> fromFirstEmitted(Publisher<String>... sources) {
         // TODO: return events from the first emitted
         // HINT: Flux.first()
+        return Flux
+                .first(sources);
 
-        throw new RuntimeException("Not implemented");
+//        throw new RuntimeException("Not implemented");
     }
 
     @Complexity(EASY)
@@ -51,16 +60,20 @@ public class Part2CreationTransformationTermination {
         // TODO: group elements by first latter
         // HINT: flux.groupBy(java.util.function.Function<? super T,? extends K>)
         // HINT: String#chartAt(0) to extract first character
+        return words
+                .groupBy(v -> v.charAt(0));
 
-        throw new RuntimeException("Not implemented");
+//        throw new RuntimeException("Not implemented");
     }
 
     @Complexity(MEDIUM)
     public static Mono<String> executeLazyTerminationOperationAndSendHello(Flux<String> source) {
         // TODO: wait completion and .THEN() execute another source
         // HINT: source.then( + Flux#just('Hello') )
+        return source
+                .then(Mono.just("Hello"));
 
-        throw new RuntimeException("Not implemented");
+//        throw new RuntimeException("Not implemented");
     }
 
     @Complexity(MEDIUM)
@@ -71,7 +84,15 @@ public class Part2CreationTransformationTermination {
         // HINT: Flux#zip produce as the result of zipping 3 streams elements of type Tuple3
         // HINT: use Tuple3.getT1 ... getT2 ... getT3
 
-        throw new RuntimeException("Not implemented");
+        // OPINTA v1
+//        return Flux
+//                .zip((args) -> "" + args[0] + args[1] + args[2], prefix, word, suffix);
+        // OPINTA v2
+        return Flux
+                .zip(prefix, word, suffix)
+                .map(tuple3 -> tuple3.getT1() + tuple3.getT2() + tuple3.getT3());
+
+//        throw new RuntimeException("Not implemented");
     }
 
     @Complexity(HARD)
@@ -90,8 +111,25 @@ public class Part2CreationTransformationTermination {
 		//
 		//
 		//
+//        Flux.zip(prefix, word, suffix)
+        // OPINTA v1
+        return Flux
+                .combineLatest(prefix, word, suffix, (args) -> Tuples.fromArray(args))
+                .cast(Tuple3.class)
+                .map(tuple3 -> "" + tuple3.getT1() + tuple3.getT2() + tuple3.getT3());
 
-        throw new RuntimeException("Not implemented");
+//        // OPINTA v2
+//        return Flux
+//                .combineLatest(prefix, word, suffix, (args) -> (Tuple3<String, String, String>)Tuples.fromArray(args))
+//                .map(tuple3 -> tuple3.getT1() + tuple3.getT2() + tuple3.getT3());
+
+        // OPINTA v3
+//        return Flux
+//                .combineLatest(prefix, word, suffix, (args) -> (Tuple3)Tuples.fromArray(args))
+//                .map(tuple3 -> "" + tuple3.getT1() + tuple3.getT2() + tuple3.getT3());
+
+
+//        throw new RuntimeException("Not implemented");
     }
 
     @Complexity(HARD)
@@ -106,6 +144,16 @@ public class Part2CreationTransformationTermination {
         //       or IceCreamType.CHOCOLATE
         //       In case if event is IceCreamType.VANILLA - return vanillaIceCreamStream Flux
         //       otherwise return chocolateIceCreamStream Flux
-        throw new RuntimeException("Not implemented yet");
+
+        return clientPreferences.switchMap(iceCreamType -> {
+            if (iceCreamType.equals(IceCreamType.VANILLA)) {
+                return vanillaIceCreamStream;
+            } else {
+                return chocolateIceCreamStream;
+            }
+        });
+
+
+//        throw new RuntimeException("Not implemented yet");
     }
 }

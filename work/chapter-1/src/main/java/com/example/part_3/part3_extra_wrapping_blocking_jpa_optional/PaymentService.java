@@ -1,5 +1,6 @@
 package com.example.part_3.part3_extra_wrapping_blocking_jpa_optional;
 
+import com.example.part_3.part3_extra_wrapping_blocking_jpa_optional.impl.BlockingPaymentsHistoryJpaRepository;
 import com.example.part_3.part3_extra_wrapping_blocking_jpa_optional.impl.ReactivePaymentsHistoryJpaRepositoryAdapter;
 import reactor.core.publisher.Flux;
 
@@ -25,7 +26,7 @@ public class PaymentService {
 	private final PaymentsHistoryReactiveJpaRepository repository;
 
 	public PaymentService() {
-		this.repository = null; // REPLACE
+		this.repository = new ReactivePaymentsHistoryJpaRepositoryAdapter((new BlockingPaymentsHistoryJpaRepository())); // REPLACE
 	}
 
 	public Flux<Payment> findPayments(Flux<String> userIds) {

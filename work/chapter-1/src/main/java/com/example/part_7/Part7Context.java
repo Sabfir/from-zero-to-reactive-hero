@@ -14,14 +14,18 @@ public class Part7Context {
 	public static Mono<String> grabDataFromTheGivenContext(Object key) {
 		// TODO: get data from the context
 
-		throw new RuntimeException("Not implemented");
+		return Mono.subscriberContext().map(context -> context.get(key));
+
+//		throw new RuntimeException("Not implemented");
 	}
 
 	@Complexity(EASY)
 	public static Mono<String> provideCorrectContext(Mono<String> source, Object key, Object value) {
 		// TODO: provide context for upstream source
 
-		throw new RuntimeException("Not implemented");
+        return source.subscriberContext(Context.of(key, value));
+
+//		throw new RuntimeException("Not implemented");
 	}
 
 	@Complexity(EASY)
@@ -30,7 +34,12 @@ public class Part7Context {
 			Publisher<String> sourceB, Context contextB) {
 		// TODO: edit without significant changes to provide corresponding context for each source
 
-		return Flux.from(sourceA)
-		           .mergeWith(sourceB);
+		return Flux
+                .from(sourceA)
+                .subscriberContext(context -> contextA)
+                .mergeWith(sourceB)
+                .subscriberContext(context -> contextB);
+//        return Flux.from(sourceA)
+//                .mergeWith(sourceB);
 	}
 }

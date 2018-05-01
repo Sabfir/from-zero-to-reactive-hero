@@ -3,7 +3,9 @@ package com.example.part_1;
 import com.example.annotations.Complexity;
 import com.example.annotations.Optional;
 import com.example.common.StringEventPublisher;
+import java.util.function.Consumer;
 import rx.Observable;
+import rx.Subscriber;
 
 import static com.example.annotations.Complexity.Level.EASY;
 import static com.example.annotations.Complexity.Level.HARD;
@@ -15,8 +17,10 @@ public class Part1ExtraExercises_Optional {
     public static Observable<String> flattenObservablesOrdered(Observable<Observable<String>> input) {
         // TODO: flatten map ordered strings to character
         // HINT: rx.Observable#concatMap
+        return input
+                .concatMap(stringObservable -> stringObservable);
 
-        throw new RuntimeException("Not implemented");
+//        throw new RuntimeException("Not implemented");
     }
 
     /**
@@ -34,7 +38,15 @@ public class Part1ExtraExercises_Optional {
     @Optional
     @Complexity(HARD)
     public static Observable<String> fizzBuzz(Observable<Integer> input) {
-        throw new RuntimeException("Not implemented");
+//        return input
+//                .map(String::valueOf);
+        return input
+                .map(i -> new IndexedWord(i, ""))
+                .map(iw -> iw.getIndex() %3 == 0 ? new IndexedWord(iw.getIndex(), "Fizz") : iw)
+                .map(iw -> iw.getIndex() %5 == 0 ? new IndexedWord(iw.getIndex(), iw.getWord() + "Bus") : iw)
+                .map(iw -> iw.getWord().isEmpty() ? String.valueOf(iw.getIndex()) : iw.getWord());
+
+//        throw new RuntimeException("Not implemented");
     }
 
     @Complexity(HARD)
@@ -66,6 +78,22 @@ public class Part1ExtraExercises_Optional {
         // TODO: adapt to Observable; consider Observable#unsafeCreate
         // HINT: combine eventPublisher.registerEventListener( with OnSubscribe::onNext )
 
-        throw new RuntimeException("Not implemented");
+
+        return Observable.unsafeCreate(new Observable.OnSubscribe<String>() {
+            @Override
+            public void call(Subscriber<? super String> subscriber) {
+//                subscriber.onNext();
+//                subscriber.onError();
+//                subscriber.onCompleted();
+                eventPublisher.registerEventListener(new Consumer<String>() {
+                    @Override
+                    public void accept(String s) {
+                        subscriber.onNext(s);
+                    }
+                });
+            }
+        });
+
+//        throw new RuntimeException("Not implemented");
     }
 }

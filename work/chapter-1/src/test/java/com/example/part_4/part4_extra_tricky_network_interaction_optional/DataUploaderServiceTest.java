@@ -13,6 +13,7 @@ import static org.junit.Assert.*;
 
 public class DataUploaderServiceTest {
 
+	// test doesn't work
 	@Test
 	public void uploadTest() {
 		TrickyHttpClient client = new TrickyHttpClient();

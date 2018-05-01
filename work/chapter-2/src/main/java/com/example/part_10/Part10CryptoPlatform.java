@@ -13,8 +13,11 @@ import com.example.part_10.utils.EmbeddedMongo;
 import com.example.part_10.utils.JsonUtils;
 import com.example.part_10.utils.LoggerConfigurationTrait;
 import com.example.part_10.utils.NettyUtils;
+import java.util.function.BiConsumer;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Hooks;
 import reactor.ipc.netty.http.server.HttpServer;
 import reactor.ipc.netty.http.websocket.WebsocketInbound;
 import reactor.ipc.netty.http.websocket.WebsocketOutbound;
@@ -62,7 +65,32 @@ public class Part10CryptoPlatform extends LoggerConfigurationTrait {
 	public static Flux<Long> handleRequestedAveragePriceIntervalValue(Flux<String> requestedInterval) {
 		// TODO: input may be incorrect, pass only correct interval
 		// TODO: ignore invalid values (empty, non number, <= 0, > 60)
-		return Flux.never();
+
+        // OPINTA v1
+//        return requestedInterval
+//                .map(s -> NumberUtils.toLong(s))
+//                .filter(number -> number > 0 && number <= 60);
+
+        // OPINTA v2
+        return requestedInterval
+                .map(Long::parseLong)
+                .filter(n -> n > 0 && n <= 60)
+                .errorStrategyContinue(new BiConsumer<Throwable, Object>() {
+                            @Override
+                            public void accept(Throwable throwable, Object aLong) {
+
+                            }
+                        });
+
+//        // OPINTA v2
+//        Hooks.onErrorDropped(t -> System.out.println(t));
+//        return requestedInterval
+//                .map(Long::parseLong)
+//                .filter(n -> n > 0 && n <= 60)
+//                .errorStrategyContinue();
+
+
+//		return Flux.never();
 	}
 
 	// Visible for testing
@@ -71,7 +99,13 @@ public class Part10CryptoPlatform extends LoggerConfigurationTrait {
 		// It is possible that writing data to output may be slower than rate of
 		// incoming output data
 
-		return outgoingStream;
+        return outgoingStream
+                .onBackpressureBuffer();
+
+//        return outgoingStream
+//                .onBackpressureBuffer(100);
+
+//		return outgoingStream;
 	}
 
 

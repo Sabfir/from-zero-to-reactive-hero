@@ -3,6 +3,9 @@ package com.example.part_10.service.impl;
 import com.example.part_10.dto.MessageDTO;
 import com.example.part_10.service.CryptoService;
 import com.example.part_10.service.PriceService;
+import com.example.part_10.service.utils.MessageMapper;
+import com.example.part_10.service.utils.Sum;
+import java.time.Duration;
 import reactor.core.publisher.Flux;
 
 import java.util.Map;
@@ -19,7 +22,7 @@ public class DefaultPriceService implements PriceService {
     public DefaultPriceService(CryptoService cryptoService) {
         sharedStream = cryptoService.eventsStream()
                                     .doOnNext(event -> logger.fine("Incoming event: " + event))
-                                    .transform(this::selectOnlyPriceUpdateEvents)
+                                    .transform(this::selectOnlyPriceUpdateEvents) // for repeatable flow signals
                                     .transform(this::currentPrice)
                                     .doOnNext(event -> logger.fine("Price event: " + event));
     }
@@ -43,14 +46,22 @@ public class DefaultPriceService implements PriceService {
 	    // TODO: verify that price message are valid
 	    // HINT: take a look at helper MessageMapper
 
-        return Flux.never();
+//        return input
+//                .filter(stringObjectMap -> MessageMapper.isValidPriceMessage(stringObjectMap));
+        return input.filter((MessageMapper::isPriceMessageType))
+                .filter(MessageMapper::isValidPriceMessage);
+
+//        return Flux.never();
     }
 
     // Visible for testing
     Flux<MessageDTO<Float>> currentPrice(Flux<Map<String, Object>> input) {
     	// TODO map to Statistic message using MessageMapper.mapToPriceMessage
 
-        return Flux.never();
+        return input
+                .map(stringObjectMap -> MessageMapper.mapToPriceMessage(stringObjectMap));
+
+//        return Flux.never();
     }
 
     // 1.1)   TODO Collect crypto currency price during the interval of seconds
@@ -67,7 +78,21 @@ public class DefaultPriceService implements PriceService {
             Flux<Long> requestedInterval,
             Flux<MessageDTO<Float>> priceData
     ) {
-        return Flux.never();
+
+        return requestedInterval
+                .switchMap(interwal -> priceData.window(Duration.ofSeconds(interwal)))
+                .flatMap(windowFlux -> windowFlux
+                        .groupBy(MessageDTO::getCurrency)
+                        .flatMap(groupedFlux -> groupedFlux.map(MessageDTO::getData)
+                                .reduce(Sum.empty(), (sum, price) -> sum.add(price))
+                                // like this
+                                .map(Sum::avg)
+                                .map(avg -> MessageDTO.avg(avg, groupedFlux.key(), "Local"))
+                                // or like this
+        //                        .map(avg -> MessageDTO.avg(avg.avg(), groupedFlux.key(), "Local"))
+                ));
+
+//        return Flux.never();
     }
 
 }

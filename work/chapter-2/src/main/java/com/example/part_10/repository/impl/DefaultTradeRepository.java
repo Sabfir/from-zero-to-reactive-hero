@@ -1,5 +1,7 @@
 package com.example.part_10.repository.impl;
 
+import com.example.part_10.service.utils.MessageMapper;
+import java.time.Duration;
 import java.util.List;
 
 import com.example.part_10.domain.Trade;
@@ -40,13 +42,19 @@ public class DefaultTradeRepository implements TradeRepository {
 	private Flux<Document> mapToDocument(Flux<Trade> flux) {
 		// TODO: Replace with corresponding mapping
 
-		return Flux.never();
+		return flux
+				.map(MessageMapper::mapToMongoDocument);
+
+//		return Flux.never();
 	}
 
 	private Flux<List<Document>> batchData(Flux<Document> tradesFlux) {
 		// TODO: provide batching of data
 
-		return Flux.empty();
+		return tradesFlux
+				.buffer(Duration.ofSeconds(1));
+
+//		return Flux.empty();
 	}
 
 	private Mono<Success> storeInMongo(List<Document> trades) {

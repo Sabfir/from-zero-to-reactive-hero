@@ -19,8 +19,10 @@ public class Part3MultithreadingParallelization {
         // TODO: publish elements on different parallel thread scheduler
         // HINT: Flux.publishOn(reactor.core.scheduler.Scheduler)
         // HINT: use reactor.core.scheduler.Schedulers.parallel() for thread-pool with several workers
+        return source
+                .parallel();
 
-        throw new RuntimeException("Not implemented");
+//        throw new RuntimeException("Not implemented");
     }
 
     @Complexity(EASY)
@@ -28,22 +30,33 @@ public class Part3MultithreadingParallelization {
         // TODO: execute call on different thread
         // HINT: Mono.fromCallable
         // HINT: Mono#sibscribeOn( + reactor.core.scheduler.Schedulers.single() )
+        return Mono
+                .fromCallable(blockingCall)
+                .publishOn(Schedulers.single());
 
-        throw new RuntimeException("Not implemented");
+//        throw new RuntimeException("Not implemented");
     }
 
     @Complexity(EASY)
     public static ParallelFlux<String> paralellizeWorkOnDifferentThreads(Flux<String> source) {
         // TODO: switch source to parallel mode
         // HINT: Flux#parallel() + .runOn( Schedulers... )
+        return source
+                .parallel()
+                .runOn(Schedulers.elastic());
 
-        throw new RuntimeException("Not implemented");
+//        throw new RuntimeException("Not implemented");
     }
 
     @Complexity(HARD)
     public static Publisher<String> paralellizeLongRunningWorkOnUnboundedAmountOfThread(Flux<Callable<String>> streamOfLongRunningSources) {
         // TODO: execute each element on separate independent threads
 
-        throw new RuntimeException("Not implemented");
+        return streamOfLongRunningSources
+                .log()
+                .flatMap(stringCallable -> Mono.fromCallable(stringCallable)
+                        .subscribeOn(Schedulers.elastic()));
+
+//        throw new RuntimeException("Not implemented");
     }
 }

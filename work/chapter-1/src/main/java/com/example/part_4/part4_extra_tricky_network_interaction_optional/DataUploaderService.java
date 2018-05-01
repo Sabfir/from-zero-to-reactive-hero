@@ -6,6 +6,7 @@ import com.example.annotations.Complexity;
 import com.example.annotations.Optional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.Signal;
 
 import static com.example.annotations.Complexity.Level.HARD;
 
@@ -29,7 +30,12 @@ public class DataUploaderService {
 		// HINT: consider usage of .windowTimeout, onBackpressureBuffer, concatMap, timeout, retryWhen or retryBackoff
 
 
+		return input.windowTimeout(50, Duration.ofMillis(500))
+                .concatMap(subFlux -> client.send(subFlux)
+                        .timeout(Duration.ofSeconds(1))
+						.retryBackoff(5, Duration.ofMillis(500))) // retries when error signal is passed (when timeout is expired)
+				.then();
 
-		throw new RuntimeException("Not implemented");
+//		throw new RuntimeException("Not implemented");
 	}
 }
